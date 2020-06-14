@@ -1,5 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'database.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -7,12 +8,13 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final appTitle = 'Form Validation Demo';
+    final appTitle = 'Share knowledge through written';
 
     return MaterialApp(
       title: appTitle,
       home: Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.teal.shade700,
           title: Text(appTitle),
         ),
         body: SafeArea(
@@ -38,73 +40,153 @@ class MyCustomFormState extends State<MyCustomForm> {
   // and allows validation of the form.
   //
   // Note: This is a GlobalKey<FormState>,
-  // not a GlobalKey<MyCustomFormState>.
+  // not a GlobalKey<MyCustomFormState>
+  // .
+  String id;
+  final db = Firestore.instance;
   final _formKey = GlobalKey<FormState>();
-  final Backend back = new Backend();
+  String title, descr,end;
+
+  void createData() async {
+    _formKey.currentState.save();
+    DocumentReference ref = await db
+        .collection('asdasd')
+        .add({'title': '$title', 'desc': '$descr','end': '$end'}).whenComplete(
+      () => Scaffold.of(context)
+          .showSnackBar(SnackBar(content: Text('Successfuly created data'))),
+    );
+    setState(() => id = ref.documentID);
+    print(ref.documentID);
+  }
 
   @override
   Widget build(BuildContext context) {
     // Build a Form widget using the _formKey created above.
     return Form(
       key: _formKey,
-      child: Column(
-        //crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          TextFormField(
-            decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: 'Enter title'
+      child: Center(
+        child: Container(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                TextFormField(
+                  decoration: new InputDecoration(
+                    labelText: "To do title",
+                    fillColor: Colors.teal,
+                    border: new OutlineInputBorder(
+                        borderRadius: new BorderRadius.circular(25.0),
+                        borderSide: new BorderSide(color: Colors.teal.shade400)),
+                  ),
+                  style: TextStyle(
+                      fontFamily: 'Sriracha',
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal),
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'To do titles is empty';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => title = value,
+                ),
+
+                SizedBox(
+                  height: 10.0,
+                ),
+                TextFormField(
+                  decoration: new InputDecoration(
+                    labelText: "What is your to do",
+                    fillColor: Colors.teal,
+                    border: new OutlineInputBorder(
+                        borderRadius: new BorderRadius.circular(25.0),
+                        borderSide: new BorderSide(color: Colors.teal.shade400)),
+                  ),
+                  style: TextStyle(
+                      fontFamily: 'Sriracha',
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal),
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'To do list is empty';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => descr = value,
+                ),
+
+                SizedBox(
+                  height: 10.0,
+                ),
+                TextFormField(
+                  decoration: new InputDecoration(
+                    labelText: "When you going to end",
+                    fillColor: Colors.teal,
+                    border: new OutlineInputBorder(
+                        borderRadius: new BorderRadius.circular(25.0),
+                        borderSide: new BorderSide(color: Colors.teal.shade400)),
+                  ),
+                  style: TextStyle(
+                      fontFamily: 'Sriracha',
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal),
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'When you going to end is empty';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => end = value,
+                ),
+
+                SizedBox(
+                  height: 10.0,
+                ),
+                ButtonTheme(
+                  minWidth: 200.0,
+                  height: 40.0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: RaisedButton(
+                      color: Colors.teal.shade100,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
+                          side: BorderSide(color: Colors.teal)
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          if (_formKey.currentState.validate()) {
+                            // If the form is valid, display a Snackbar.
+                            createData();
+                          }
+                        });
+                        // Validate returns true if the form is valid, or false
+                        // otherwise.
+                      },
+
+                      child: Text(
+                        'Create todo',
+                        style: TextStyle(
+                            fontFamily: 'Sriracha',
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54),
+
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-
-            validator: (value) {
-              if (value.isEmpty) {
-                return 'Please enter some text';
-              }
-              return null;
-            },
-            onSaved: (value) => back.title = value,
-
           ),
-          TextFormField(
-            decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: 'Enter title',
-               filled: true,
-
-            ),
-
-            validator: (value) {
-              if (value.isEmpty) {
-                return 'Please enter some desc';
-              }
-              return null;
-            },
-            onSaved: (value) => back.descr = value,
-
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: RaisedButton(
-              onPressed: () {
-                setState(() {
-                  if (_formKey.currentState.validate()) {
-                    // If the form is valid, display a Snackbar.
-                    back.createData(back.title, back.descr);
-                    Scaffold.of(context)
-                        .showSnackBar(SnackBar(content: Text('Wait man data will inserting to firebase')));
-                  }
-                });
-                // Validate returns true if the form is valid, or false
-                // otherwise.
-
-              },
-              child: Text('Submit'),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 }
-
-
